@@ -21,6 +21,8 @@ export class Game extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
   private playerSprite!: Phaser.GameObjects.Rectangle;
   private playerGlow!: Phaser.GameObjects.Arc;
+  private playerTrail!: Phaser.GameObjects.Graphics;
+  private particles!: Phaser.GameObjects.Graphics;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<'W' | 'A' | 'S' | 'D' | 'SPACE', Phaser.Input.Keyboard.Key>;
   private rulePanel!: Phaser.GameObjects.Text;
@@ -192,8 +194,16 @@ export class Game extends Phaser.Scene {
   }
 
   private createPlayer(): void {
+    // Create particle system
+    this.particles = this.add.graphics();
+    this.createAmbientParticles();
+    
     // Create player container for enhanced visuals
     this.player = this.add.container(480, 270);
+    
+    // Player trail effect
+    this.playerTrail = this.add.graphics();
+    this.player.add(this.playerTrail);
     
     // Player glow effect
     this.playerGlow = this.add.circle(0, 0, 12, Game.C_GLOW, 0.3);
@@ -215,6 +225,40 @@ export class Game extends Phaser.Scene {
       repeat: -1,
       ease: 'Sine.easeInOut'
     });
+    
+    // Add rotation animation to player sprite
+    this.tweens.add({
+      targets: this.playerSprite,
+      angle: 360,
+      duration: 8000,
+      repeat: -1,
+      ease: 'Linear'
+    });
+  }
+  
+  private createAmbientParticles(): void {
+    // Create floating particles in the background
+    const particleCount = 15;
+    for (let i = 0; i < particleCount; i++) {
+      const x = Math.random() * this.scale.width;
+      const y = Math.random() * this.scale.height;
+      const size = 1 + Math.random() * 2;
+      const alpha = 0.1 + Math.random() * 0.3;
+      
+      this.tweens.add({
+        targets: { x, y, alpha },
+        x: x + (Math.random() - 0.5) * 100,
+        y: y - 50,
+        alpha: 0,
+        duration: 3000 + Math.random() * 2000,
+        repeat: -1,
+        delay: Math.random() * 2000,
+        onUpdate: () => {
+          this.particles.fillStyle(Game.C_TEAL, alpha);
+          this.particles.fillCircle(x, y, size);
+        }
+      });
+    }
   }
 
   private createRulePanel(): void {
@@ -260,8 +304,38 @@ export class Game extends Phaser.Scene {
     if (this.cursors.up.isDown || this.wasd.W.isDown) dy -= speed;
     if (this.cursors.down.isDown || this.wasd.S.isDown) dy += speed;
 
+    const oldX = this.player.x;
+    const oldY = this.player.y;
+    
     this.player.x = Phaser.Math.Clamp(this.player.x + dx, 10, this.scale.width - 10);
     this.player.y = Phaser.Math.Clamp(this.player.y + dy, 10, this.scale.height - 10);
+    
+    // Create trail effect when moving
+    if (dx !== 0 || dy !== 0) {
+      this.createTrailEffect(oldX, oldY);
+    }
+  }
+  
+  private createTrailEffect(x: number, y: number): void {
+    this.playerTrail.clear();
+    this.playerTrail.fillStyle(Game.C_TEAL, 0.3);
+    this.playerTrail.fillCircle(x - this.player.x, y - this.player.y, 8);
+    
+    // Fade out trail
+    const trailData = { alpha: 0.3 };
+    this.tweens.add({
+      targets: trailData,
+      alpha: 0,
+      duration: 500,
+      onUpdate: () => {
+        this.playerTrail.clear();
+        this.playerTrail.fillStyle(Game.C_TEAL, trailData.alpha);
+        this.playerTrail.fillCircle(x - this.player.x, y - this.player.y, 8);
+      },
+      onComplete: () => {
+        this.playerTrail.clear();
+      }
+    });
   }
 
   private updateOverlapState(): void {
@@ -271,13 +345,38 @@ export class Game extends Phaser.Scene {
       if (Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), zone.getBounds())) {
         this.activeJunctionId = subsystemId;
         this.rulePanel.setText(this.describeSubsystem(subsystemId));
-        this.rulePanel.setColor('#00E5C8');
+        this.rulePanel.setColor('#00f0e6');
+        
+        // Highlight active junction
+        this.highlightJunction(subsystemId);
         return;
       }
     }
 
     this.rulePanel.setText('APPROACH A JUNCTION TO VIEW RULES');
     this.rulePanel.setColor('#4A5568');
+  }
+  
+  private highlightJunction(subsystemId: string): void {
+    const zone = this.junctionZones.get(subsystemId);
+    if (!zone) return;
+    
+    // Create highlight effect
+    const highlight = this.add.graphics();
+    highlight.lineStyle(2, Game.C_GLOW, 0.8);
+    highlight.strokeRect(zone.x - 2, zone.y - 2, 44, 44);
+    
+    // Pulsing animation
+    this.tweens.add({
+      targets: highlight,
+      alpha: 0.3,
+      duration: 800,
+      yoyo: true,
+      repeat: 2,
+      onComplete: () => {
+        highlight.destroy();
+      }
+    });
   }
 
   private describeSubsystem(subsystemId: string): string {

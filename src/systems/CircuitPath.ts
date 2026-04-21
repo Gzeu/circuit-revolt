@@ -7,6 +7,8 @@ export class CircuitPath {
   private color: number;
   private active = true;
   private tween?: Phaser.Tweens.Tween;
+  private sparkles: Phaser.GameObjects.Graphics[] = [];
+  private glowIntensity = 0;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -24,17 +26,59 @@ export class CircuitPath {
       return;
     }
 
-    // Draw glow effect
-    this.graphics.lineStyle(6, this.color, 0.2);
+    // Enhanced glow effect with pulsing
+    const glowAlpha = this.active ? 0.3 + this.glowIntensity * 0.2 : 0.1;
+    this.graphics.lineStyle(8, this.color, glowAlpha);
     this.drawBezierCurve();
     
-    // Draw main path
-    this.graphics.lineStyle(2, this.color, this.active ? 0.8 : 0.4);
+    // Draw main path with enhanced brightness
+    const mainAlpha = this.active ? 0.9 : 0.4;
+    this.graphics.lineStyle(3, this.color, mainAlpha);
     this.drawBezierCurve();
     
     // Draw inner bright line
     this.graphics.lineStyle(1, this.color, 1);
     this.drawBezierCurve();
+    
+    // Add sparkle effects along the path
+    if (this.active) {
+      this.createSparkles();
+    }
+  }
+  
+  private createSparkles(): void {
+    // Clear existing sparkles
+    this.sparkles.forEach(sparkle => sparkle.destroy());
+    this.sparkles = [];
+    
+    // Create new sparkles along the path
+    const sparkleCount = 5;
+    for (let i = 0; i < sparkleCount; i++) {
+      const t = (i + 1) / (sparkleCount + 1);
+      const point = this.evaluateBezier(t);
+      
+      const sparkle = this.scene.add.graphics();
+      sparkle.fillStyle(this.color, 0.6);
+      sparkle.fillCircle(point.x, point.y, 1);
+      
+      // Animate sparkle
+      const sparkleData = { scale: 1, alpha: 0.6 };
+      this.scene.tweens.add({
+        targets: sparkleData,
+        scale: 1.5,
+        alpha: 0,
+        duration: 1000 + i * 200,
+        repeat: -1,
+        delay: i * 200,
+        onUpdate: () => {
+          sparkle.clear();
+          sparkle.fillStyle(this.color, sparkleData.alpha);
+          sparkle.fillCircle(point.x, point.y, sparkleData.scale);
+        }
+      });
+      
+      this.sparkles.push(sparkle);
+    }
   }
   
   private drawBezierCurve(): void {
@@ -58,9 +102,14 @@ export class CircuitPath {
 
     this.dot?.destroy();
     
-    // Create enhanced pulse with glow
-    const glow = this.scene.add.circle(this.points[0].x, this.points[0].y, 8, this.color, 0.3);
+    // Create enhanced pulse with multiple glow layers
+    const outerGlow = this.scene.add.circle(this.points[0].x, this.points[0].y, 12, this.color, 0.2);
+    const innerGlow = this.scene.add.circle(this.points[0].x, this.points[0].y, 8, this.color, 0.4);
     this.dot = this.scene.add.circle(this.points[0].x, this.points[0].y, 4, this.color, 1);
+    
+    // Create trail effect
+    const trail = this.scene.add.graphics();
+    const trailPoints: {x: number, y: number, alpha: number}[] = [];
     
     const progress = { t: 0, scale: 1, alpha: 1 };
     this.tween?.stop();
@@ -70,20 +119,46 @@ export class CircuitPath {
       duration: durationMs,
       ease: 'Sine.easeInOut',
       onUpdate: () => {
-        if (!this.dot || !glow) return;
+        if (!this.dot || !outerGlow || !innerGlow) return;
         const point = this.evaluateBezier(progress.t);
         this.dot.setPosition(point.x, point.y);
-        glow.setPosition(point.x, point.y);
+        outerGlow.setPosition(point.x, point.y);
+        innerGlow.setPosition(point.x, point.y);
         
-        // Pulsing effect
-        const pulseScale = 1 + Math.sin(progress.t * Math.PI * 4) * 0.3;
-        glow.setScale(pulseScale);
-        glow.setAlpha(0.3 + Math.sin(progress.t * Math.PI * 4) * 0.2);
+        // Enhanced pulsing effect
+        const pulseScale = 1 + Math.sin(progress.t * Math.PI * 6) * 0.4;
+        const pulseAlpha = 0.3 + Math.sin(progress.t * Math.PI * 6) * 0.3;
+        outerGlow.setScale(pulseScale * 1.5);
+        outerGlow.setAlpha(pulseAlpha * 0.5);
+        innerGlow.setScale(pulseScale);
+        innerGlow.setAlpha(pulseAlpha);
+        
+        // Update glow intensity for path
+        this.glowIntensity = pulseAlpha;
+        this.draw();
+        
+        // Add trail point
+        if (progress.t > 0.1) {
+          trailPoints.push({ x: point.x, y: point.y, alpha: 0.5 });
+          if (trailPoints.length > 10) trailPoints.shift();
+          
+          // Draw trail
+          trail.clear();
+          trailPoints.forEach((tp, index) => {
+            const trailAlpha = tp.alpha * (index / trailPoints.length) * 0.3;
+            trail.fillStyle(this.color, trailAlpha);
+            trail.fillCircle(tp.x, tp.y, 2);
+          });
+        }
       },
       onComplete: () => {
         this.dot?.destroy();
-        glow?.destroy();
+        outerGlow?.destroy();
+        innerGlow?.destroy();
+        trail?.destroy();
         this.dot = undefined;
+        this.glowIntensity = 0;
+        this.draw();
         onComplete?.();
       },
     });
