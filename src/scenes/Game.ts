@@ -141,7 +141,7 @@ export class Game extends Phaser.Scene {
       zoneBox.strokeRect(zone.x, zone.y, 40, 40);
 
       const label = this.add.text(zone.x - 6, zone.y - 18, `${index + 1}. ${subsystem.name}`, {
-        fontFamily: "'Geist Mono', monospace",
+        fontFamily: "'Courier New', monospace",
         fontSize: '10px',
         color: '#4A5568',
         letterSpacing: 1,
@@ -157,7 +157,7 @@ export class Game extends Phaser.Scene {
 
   private createRulePanel(): void {
     this.rulePanel = this.add.text(24, 420, 'APPROACH A JUNCTION TO VIEW RULES', {
-      fontFamily: "'Geist Mono', monospace",
+      fontFamily: "'Courier New', monospace",
       fontSize: '12px',
       color: '#4A5568',
       backgroundColor: '#0D0F14',

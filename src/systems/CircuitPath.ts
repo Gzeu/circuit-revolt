@@ -25,9 +25,10 @@ export class CircuitPath {
       return;
     }
 
-    this.graphics.beginPath();
-    this.graphics.moveTo(this.points[0].x, this.points[0].y);
-    this.graphics.bezierCurveTo(
+    const ctx = (this.graphics as any).getContext();
+    ctx.beginPath();
+    ctx.moveTo(this.points[0].x, this.points[0].y);
+    ctx.bezierCurveTo(
       this.points[1].x,
       this.points[1].y,
       this.points[2].x,
@@ -35,7 +36,7 @@ export class CircuitPath {
       this.points[3].x,
       this.points[3].y,
     );
-    this.graphics.strokePath();
+    ctx.stroke();
   }
 
   pulse(durationMs: number, onComplete?: () => void): void {
