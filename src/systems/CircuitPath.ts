@@ -25,18 +25,18 @@ export class CircuitPath {
       return;
     }
 
-    const ctx = (this.graphics as any).getContext();
-    ctx.beginPath();
-    ctx.moveTo(this.points[0].x, this.points[0].y);
-    ctx.bezierCurveTo(
-      this.points[1].x,
-      this.points[1].y,
-      this.points[2].x,
-      this.points[2].y,
-      this.points[3].x,
-      this.points[3].y,
-    );
-    ctx.stroke();
+    // Draw bezier curve using multiple line segments
+    const steps = 50;
+    this.graphics.beginPath();
+    this.graphics.moveTo(this.points[0].x, this.points[0].y);
+    
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const point = this.evaluateBezier(t);
+      this.graphics.lineTo(point.x, point.y);
+    }
+    
+    this.graphics.strokePath();
   }
 
   pulse(durationMs: number, onComplete?: () => void): void {
