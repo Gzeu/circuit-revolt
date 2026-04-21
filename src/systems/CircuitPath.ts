@@ -3,7 +3,7 @@ import type { Point } from '../types';
 
 export class CircuitPath {
   private readonly graphics: Phaser.GameObjects.Graphics;
-  private dot?: Phaser.GameObjects.Arc;
+  private dot: Phaser.GameObjects.Arc | undefined;
   private color: number;
   private active = true;
   private tween?: Phaser.Tweens.Tween;
@@ -19,13 +19,25 @@ export class CircuitPath {
 
   draw(): void {
     this.graphics.clear();
-    this.graphics.lineStyle(2, this.color, 0.6);
-
+    
     if (this.points.length < 4) {
       return;
     }
 
-    // Draw bezier curve using multiple line segments
+    // Draw glow effect
+    this.graphics.lineStyle(6, this.color, 0.2);
+    this.drawBezierCurve();
+    
+    // Draw main path
+    this.graphics.lineStyle(2, this.color, this.active ? 0.8 : 0.4);
+    this.drawBezierCurve();
+    
+    // Draw inner bright line
+    this.graphics.lineStyle(1, this.color, 1);
+    this.drawBezierCurve();
+  }
+  
+  private drawBezierCurve(): void {
     const steps = 50;
     this.graphics.beginPath();
     this.graphics.moveTo(this.points[0].x, this.points[0].y);
@@ -45,9 +57,12 @@ export class CircuitPath {
     }
 
     this.dot?.destroy();
-    this.dot = this.scene.add.circle(this.points[0].x, this.points[0].y, 5, this.color, 1);
-
-    const progress = { t: 0 };
+    
+    // Create enhanced pulse with glow
+    const glow = this.scene.add.circle(this.points[0].x, this.points[0].y, 8, this.color, 0.3);
+    this.dot = this.scene.add.circle(this.points[0].x, this.points[0].y, 4, this.color, 1);
+    
+    const progress = { t: 0, scale: 1, alpha: 1 };
     this.tween?.stop();
     this.tween = this.scene.tweens.add({
       targets: progress,
@@ -55,13 +70,19 @@ export class CircuitPath {
       duration: durationMs,
       ease: 'Sine.easeInOut',
       onUpdate: () => {
-        if (!this.dot) return;
+        if (!this.dot || !glow) return;
         const point = this.evaluateBezier(progress.t);
         this.dot.setPosition(point.x, point.y);
-        this.dot.setFillStyle(this.color, 1);
+        glow.setPosition(point.x, point.y);
+        
+        // Pulsing effect
+        const pulseScale = 1 + Math.sin(progress.t * Math.PI * 4) * 0.3;
+        glow.setScale(pulseScale);
+        glow.setAlpha(0.3 + Math.sin(progress.t * Math.PI * 4) * 0.2);
       },
       onComplete: () => {
         this.dot?.destroy();
+        glow?.destroy();
         this.dot = undefined;
         onComplete?.();
       },

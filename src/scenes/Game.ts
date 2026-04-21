@@ -1,22 +1,26 @@
 import Phaser from 'phaser';
 import machinesData from '../data/machines.json';
-import type { GameState, MachineDef, Point, SubsystemDef, SubsystemState } from '../types';
+import type { GameState, MachineDef, SubsystemState } from '../types';
 import { CircuitPath } from '../systems/CircuitPath';
 import { MeltdownTimer } from '../systems/MeltdownTimer';
 import { SubsystemLogic } from '../systems/SubsystemLogic';
 
 export class Game extends Phaser.Scene {
-  static readonly C_BG = 0x0d0f14;
-  static readonly C_SURFACE = 0x1e2a3a;
-  static readonly C_TEAL = 0x00e5c8;
-  static readonly C_AMBER = 0xf5a623;
-  static readonly C_GREY = 0x4a5568;
-  static readonly C_FAULT = 0xff4d6d;
+  static readonly C_BG = 0x0a0c10;
+  static readonly C_SURFACE = 0x1a2332;
+  static readonly C_TEAL = 0x00f0e6;
+  static readonly C_AMBER = 0xff9500;
+  static readonly C_GREY = 0x3a4556;
+  static readonly C_FAULT = 0xff3366;
+  static readonly C_GLOW = 0x00ffff;
+  static readonly C_WARNING = 0xffaa00;
 
   private machine!: MachineDef;
   private gameState!: GameState;
   private meltdownTimer!: MeltdownTimer;
-  private player!: Phaser.GameObjects.Rectangle;
+  private player!: Phaser.GameObjects.Container;
+  private playerSprite!: Phaser.GameObjects.Rectangle;
+  private playerGlow!: Phaser.GameObjects.Arc;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<'W' | 'A' | 'S' | 'D' | 'SPACE', Phaser.Input.Keyboard.Key>;
   private rulePanel!: Phaser.GameObjects.Text;
@@ -76,36 +80,73 @@ export class Game extends Phaser.Scene {
   private drawBackground(): void {
     const { width, height } = this.scale;
     const bg = this.add.graphics();
+    
+    // Gradient background
     bg.fillStyle(Game.C_BG, 1);
     bg.fillRect(0, 0, width, height);
-    bg.lineStyle(1, Game.C_SURFACE, 0.55);
-
+    
+    // Add subtle gradient overlay using rectangles
+    const gradientSteps = 20;
+    for (let i = 0; i <= gradientSteps; i++) {
+      const t = i / gradientSteps;
+      const alpha = 0.1 * (1 - t) + 0.05 * t;
+      const y = (height / gradientSteps) * i;
+      const h = height / gradientSteps;
+      bg.fillStyle(Game.C_SURFACE, alpha);
+      bg.fillRect(0, y, width, h);
+    }
+    
+    // Enhanced grid with glow effect
+    bg.lineStyle(1, Game.C_SURFACE, 0.3);
     for (let x = 0; x <= width; x += 40) {
       bg.beginPath();
       bg.moveTo(x, 0);
       bg.lineTo(x, height);
       bg.strokePath();
     }
-
     for (let y = 0; y <= height; y += 40) {
       bg.beginPath();
       bg.moveTo(0, y);
       bg.lineTo(width, y);
       bg.strokePath();
     }
+    
+    // Add corner accents
+    bg.fillStyle(Game.C_TEAL, 0.05);
+    bg.fillCircle(50, 50, 30);
+    bg.fillCircle(width - 50, 50, 30);
+    bg.fillCircle(50, height - 50, 30);
+    bg.fillCircle(width - 50, height - 50, 30);
   }
 
   private drawMachineFrame(): void {
     const machineOrigin = { x: 280, y: 120 };
     const frame = this.add.graphics();
-    frame.lineStyle(2, Game.C_SURFACE, 1);
+    
+    // Machine background with gradient
+    frame.fillStyle(Game.C_SURFACE, 0.2);
+    frame.fillRoundedRect(machineOrigin.x, machineOrigin.y, 400, 300, 12);
+    
+    // Enhanced frame with glow
+    frame.lineStyle(3, Game.C_TEAL, 0.8);
     frame.strokeRoundedRect(machineOrigin.x, machineOrigin.y, 400, 300, 12);
-
+    frame.lineStyle(1, Game.C_SURFACE, 1);
+    frame.strokeRoundedRect(machineOrigin.x + 2, machineOrigin.y + 2, 396, 296, 10);
+    
+    // Enhanced title with glow effect
     this.add.text(machineOrigin.x + 16, machineOrigin.y - 22, this.machine.name, {
       fontFamily: "'Azeret Mono', monospace",
       fontSize: '18px',
-      color: '#00E5C8',
+      color: '#00f0e6',
       letterSpacing: 2,
+      shadow: {
+        offsetX: 0,
+        offsetY: 0,
+        color: '#00f0e6',
+        blur: 8,
+        stroke: true,
+        fill: true
+      }
     });
   }
 
@@ -151,19 +192,56 @@ export class Game extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    this.player = this.add.rectangle(480, 270, 18, 18, Game.C_TEAL, 1)
-      .setStrokeStyle(1, Game.C_SURFACE, 1);
+    // Create player container for enhanced visuals
+    this.player = this.add.container(480, 270);
+    
+    // Player glow effect
+    this.playerGlow = this.add.circle(0, 0, 12, Game.C_GLOW, 0.3);
+    this.player.add(this.playerGlow);
+    
+    // Main player sprite
+    this.playerSprite = this.add.rectangle(0, 0, 16, 16, Game.C_TEAL, 1)
+      .setStrokeStyle(2, Game.C_SURFACE, 1);
+    this.player.add(this.playerSprite);
+    
+    // Add pulsing animation to glow
+    this.tweens.add({
+      targets: this.playerGlow,
+      scaleX: 1.2,
+      scaleY: 1.2,
+      alpha: 0.6,
+      duration: 1000,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
   }
 
   private createRulePanel(): void {
-    this.rulePanel = this.add.text(24, 420, 'APPROACH A JUNCTION TO VIEW RULES', {
+    // Panel background
+    const panelBg = this.add.graphics();
+    panelBg.fillStyle(Game.C_BG, 0.95);
+    panelBg.fillRoundedRect(20, 418, 340, 100, 8);
+    panelBg.lineStyle(1, Game.C_TEAL, 0.6);
+    panelBg.strokeRoundedRect(20, 418, 340, 100, 8);
+    panelBg.setDepth(99);
+    
+    this.rulePanel = this.add.text(30, 428, 'APPROACH A JUNCTION TO VIEW RULES', {
       fontFamily: "'Courier New', monospace",
       fontSize: '12px',
       color: '#4A5568',
-      backgroundColor: '#0D0F14',
+      backgroundColor: 'transparent',
       padding: { x: 10, y: 8 },
       wordWrap: { width: 320 },
       lineSpacing: 6,
+      shadow: {
+        offsetX: 0,
+        offsetY: 0,
+        color: '#00f0e6',
+        blur: 2,
+        stroke: false,
+        fill: false
+      }
     }).setDepth(100);
   }
 
