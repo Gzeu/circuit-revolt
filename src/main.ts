@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Boot } from './scenes/Boot';
 import { Preload } from './scenes/Preload';
+import { StoryIntro } from './scenes/StoryIntro';
 import { MainMenu } from './scenes/MainMenu';
 import { Game } from './scenes/Game';
 import { GameOver } from './scenes/GameOver';
@@ -21,7 +22,7 @@ const config: Phaser.Types.Core.GameConfig = {
     pixelArt: false,
     roundPixels: false,
   },
-  scene: [Boot, Preload, MainMenu, Game, GameOver],
+  scene: [Boot, Preload, StoryIntro, MainMenu, Game, GameOver],
 };
 
 const fallback = document.getElementById('boot-fallback');

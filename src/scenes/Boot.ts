@@ -16,6 +16,7 @@ export class Boot extends Phaser.Scene {
 
   create(): void {
     this.applyPaletteToDOM();
+    // Scene flow: Boot -> Preload -> StoryIntro -> MainMenu -> Game -> GameOver
     this.scene.start('Preload');
   }
 

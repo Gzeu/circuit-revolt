@@ -21,7 +21,7 @@ export class MeltdownTimer {
     this.glow = this.scene.add.graphics();
     
     this.warningText = this.scene.add.text(this.x + this.width / 2, this.y - 15, 'MELTDOWN PROGRESS', {
-      fontFamily: "'Courier New', monospace",
+      fontFamily: "'Geist Mono', monospace",
       fontSize: '10px',
       color: '#4A5568',
       letterSpacing: 1,

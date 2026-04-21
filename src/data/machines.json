@@ -1,7 +1,7 @@
 [
   {
     "id": "sort-3x",
-    "name": "SORT-3X™",
+    "name": "SORT-3Xâ",
     "subsystems": [
       {
         "id": "sort-3x-intake",
@@ -75,6 +75,405 @@
           { "x": 346, "y": 238 },
           { "x": 374, "y": 252 },
           { "x": 396, "y": 264 }
+        ],
+        "color": "#00E5C8"
+      }
+    ]
+  },
+  {
+    "id": "weld-7",
+    "name": "WELD-7â",
+    "subsystems": [
+      {
+        "id": "weld-7-arc-init",
+        "name": "ARC-INIT",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 70 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 900
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 25
+        },
+        "pathPoints": [
+          { "x": 40, "y": 240 },
+          { "x": 120, "y": 200 },
+          { "x": 180, "y": 140 },
+          { "x": 240, "y": 100 }
+        ],
+        "color": "#00E5C8"
+      },
+      {
+        "id": "weld-7-plasma-feed",
+        "name": "PLASMA-FEED",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 75 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 800
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 28
+        },
+        "pathPoints": [
+          { "x": 240, "y": 100 },
+          { "x": 280, "y": 80 },
+          { "x": 320, "y": 160 },
+          { "x": 360, "y": 200 }
+        ],
+        "color": "#F5A623"
+      },
+      {
+        "id": "weld-7-cooldown-lock",
+        "name": "COOLDOWN-LOCK",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 80 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 700
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 32
+        },
+        "pathPoints": [
+          { "x": 360, "y": 200 },
+          { "x": 380, "y": 220 },
+          { "x": 390, "y": 260 },
+          { "x": 380, "y": 280 }
+        ],
+        "color": "#00E5C8"
+      }
+    ]
+  },
+  {
+    "id": "conv-9",
+    "name": "CONV-9â",
+    "subsystems": [
+      {
+        "id": "conv-9-belt-a",
+        "name": "BELT-A",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 68 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 800
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 20
+        },
+        "pathPoints": [
+          { "x": 20, "y": 150 },
+          { "x": 100, "y": 120 },
+          { "x": 160, "y": 180 },
+          { "x": 200, "y": 150 }
+        ],
+        "color": "#00E5C8"
+      },
+      {
+        "id": "conv-9-belt-b",
+        "name": "BELT-B",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 72 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 700
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 22
+        },
+        "pathPoints": [
+          { "x": 200, "y": 150 },
+          { "x": 240, "y": 130 },
+          { "x": 280, "y": 190 },
+          { "x": 320, "y": 170 }
+        ],
+        "color": "#F5A623"
+      },
+      {
+        "id": "conv-9-junction-ctrl",
+        "name": "JUNCTION-CTRL",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 76 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 650
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 26
+        },
+        "pathPoints": [
+          { "x": 320, "y": 170 },
+          { "x": 340, "y": 150 },
+          { "x": 360, "y": 210 },
+          { "x": 340, "y": 250 }
+        ],
+        "color": "#00E5C8"
+      },
+      {
+        "id": "conv-9-overflow-gate",
+        "name": "OVERFLOW-GATE",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 82 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 600
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 30
+        },
+        "pathPoints": [
+          { "x": 340, "y": 250 },
+          { "x": 320, "y": 270 },
+          { "x": 360, "y": 280 },
+          { "x": 380, "y": 260 }
+        ],
+        "color": "#F5A623"
+      }
+    ]
+  },
+  {
+    "id": "press-x",
+    "name": "PRESS-Xâ",
+    "subsystems": [
+      {
+        "id": "press-x-pressure-init",
+        "name": "PRESSURE-INIT",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 74 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 700
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 18
+        },
+        "pathPoints": [
+          { "x": 60, "y": 200 },
+          { "x": 140, "y": 160 },
+          { "x": 200, "y": 120 },
+          { "x": 260, "y": 80 }
+        ],
+        "color": "#00E5C8"
+      },
+      {
+        "id": "press-x-valve-lock",
+        "name": "VALVE-LOCK",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 78 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 650
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 20
+        },
+        "pathPoints": [
+          { "x": 260, "y": 80 },
+          { "x": 300, "y": 60 },
+          { "x": 320, "y": 140 },
+          { "x": 300, "y": 180 }
+        ],
+        "color": "#F5A623"
+      },
+      {
+        "id": "press-x-release-ctrl",
+        "name": "RELEASE-CTRL",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 82 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 600
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 24
+        },
+        "pathPoints": [
+          { "x": 300, "y": 180 },
+          { "x": 280, "y": 200 },
+          { "x": 320, "y": 240 },
+          { "x": 340, "y": 220 }
+        ],
+        "color": "#00E5C8"
+      }
+    ]
+  },
+  {
+    "id": "core-ai",
+    "name": "CORE-AIâ",
+    "subsystems": [
+      {
+        "id": "core-ai-kernel",
+        "name": "KERNEL",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 76 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 600
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 15
+        },
+        "pathPoints": [
+          { "x": 80, "y": 180 },
+          { "x": 160, "y": 140 },
+          { "x": 200, "y": 100 },
+          { "x": 240, "y": 60 }
+        ],
+        "color": "#00E5C8"
+      },
+      {
+        "id": "core-ai-memory-bus",
+        "name": "MEMORY-BUS",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 78 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 550
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 18
+        },
+        "pathPoints": [
+          { "x": 240, "y": 60 },
+          { "x": 280, "y": 40 },
+          { "x": 300, "y": 120 },
+          { "x": 280, "y": 160 }
+        ],
+        "color": "#F5A623"
+      },
+      {
+        "id": "core-ai-io-bridge",
+        "name": "I/O-BRIDGE",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 80 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 500
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 20
+        },
+        "pathPoints": [
+          { "x": 280, "y": 160 },
+          { "x": 260, "y": 180 },
+          { "x": 300, "y": 220 },
+          { "x": 320, "y": 200 }
+        ],
+        "color": "#00E5C8"
+      },
+      {
+        "id": "core-ai-threat-core",
+        "name": "THREAT-CORE",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 82 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 480
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 22
+        },
+        "pathPoints": [
+          { "x": 320, "y": 200 },
+          { "x": 340, "y": 180 },
+          { "x": 360, "y": 240 },
+          { "x": 340, "y": 260 }
+        ],
+        "color": "#F5A623"
+      },
+      {
+        "id": "core-ai-failsafe",
+        "name": "FAILSAFE",
+        "rule": {
+          "conditions": [
+            [
+              { "field": "load", "operator": ">", "value": 84 },
+              { "field": "coolant", "operator": "==", "value": false }
+            ]
+          ],
+          "interval": 450
+        },
+        "exitCondition": {
+          "field": "load",
+          "operator": "<",
+          "value": 25
+        },
+        "pathPoints": [
+          { "x": 340, "y": 260 },
+          { "x": 320, "y": 280 },
+          { "x": 360, "y": 290 },
+          { "x": 380, "y": 270 }
         ],
         "color": "#00E5C8"
       }

@@ -46,3 +46,10 @@ export type GameState = {
   meltdownProgress: number;
   playerHits: number;
 };
+
+export interface RunStats {
+  floorsCleared: number;
+  totalHits: number;
+  routeActions: number;
+  elapsedMs: number;
+}

@@ -29,18 +29,16 @@ export class SubsystemLogic {
   applyRoute(state: SubsystemState, junctionId: string, newColor: string): SubsystemState {
     const junctionBoost = junctionId.length % 7;
     const nextLoad = Math.max(0, state.load - (18 + junctionBoost));
-    const nextStatus = nextLoad <= this.def.exitCondition.value ? 'shutdown' : this.evaluate({
+    const projectedState = {
       ...state,
       load: nextLoad,
       coolant: true,
       routedColor: newColor,
-    });
+    };
+    const nextStatus = this.isExitConditionMet(projectedState) ? 'shutdown' : this.evaluate(projectedState);
 
     return {
-      ...state,
-      load: nextLoad,
-      coolant: true,
-      routedColor: newColor,
+      ...projectedState,
       status: nextStatus,
     };
   }

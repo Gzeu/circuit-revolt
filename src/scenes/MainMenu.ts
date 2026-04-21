@@ -28,6 +28,9 @@ export class MainMenu extends Phaser.Scene {
 
   private walletBtn!: Phaser.GameObjects.Text;
   private walletLabel!: Phaser.GameObjects.Text;
+  private howToPlayBtn!: Phaser.GameObjects.Text;
+  private howToPlayOverlay!: Phaser.GameObjects.Container;
+  private howToPlayVisible = false;
 
   constructor() {
     super({ key: 'MainMenu' });
@@ -90,6 +93,16 @@ export class MainMenu extends Phaser.Scene {
       letterSpacing: 2,
     }).setOrigin(0.5);
 
+    this.howToPlayBtn = this.makeButton(
+      cx,
+      425,
+      '[ HOW TO PLAY ]',
+      11,
+      MainMenu.S_GREY,
+      () => this.toggleHowToPlay(),
+      true
+    );
+
     this.add.text(cx, height - 20, 'MIT LICENSE · OPEN SOURCE · GITHUB.COM/GZEU/CIRCUIT-REVOLT', {
       fontFamily: "'Geist Mono', monospace",
       fontSize: '8px',
@@ -97,7 +110,15 @@ export class MainMenu extends Phaser.Scene {
       letterSpacing: 2,
     }).setOrigin(0.5);
 
+    this.createHowToPlayOverlay();
     this.startScanlineEffect();
+
+    // ESC key handler
+    this.input.keyboard!.on('keydown-ESC', () => {
+      if (this.howToPlayVisible) {
+        this.hideHowToPlay();
+      }
+    });
   }
 
   private drawBackground(): void {
@@ -225,5 +246,93 @@ export class MainMenu extends Phaser.Scene {
     const short = `${address.slice(0, 6)}…${address.slice(-4)}`.toUpperCase();
     this.walletLabel.setText(`OPERATOR: ${short}`);
     this.walletLabel.setColor(MainMenu.S_AMBER);
+  }
+
+  private createHowToPlayOverlay(): void {
+    const { width, height } = this.scale;
+    
+    this.howToPlayOverlay = this.add.container(0, 0).setDepth(1000).setVisible(false);
+    
+    // Dark semi-transparent background
+    const bg = this.add.graphics();
+    bg.fillStyle(0x0D0F14, 0.95);
+    bg.fillRect(0, 0, width, height);
+    this.howToPlayOverlay.add(bg);
+    
+    // Panel background
+    const panel = this.add.graphics();
+    panel.fillStyle(MainMenu.C_SURFACE, 0.8);
+    panel.fillRoundedRect(width/2 - 300, height/2 - 200, 600, 400, 12);
+    panel.lineStyle(2, MainMenu.C_TEAL, 0.6);
+    panel.strokeRoundedRect(width/2 - 300, height/2 - 200, 600, 400, 12);
+    this.howToPlayOverlay.add(panel);
+    
+    // Title
+    this.howToPlayOverlay.add(this.add.text(width/2, height/2 - 160, 'CONTROLS & OBJECTIVE', {
+      fontFamily: "'Azeret Mono', monospace",
+      fontSize: '18px',
+      color: MainMenu.S_TEAL,
+      letterSpacing: 2,
+    }).setOrigin(0.5));
+    
+    // Content
+    const content = [
+      "WASD / ARROWS — MOVE MAINT-AI",
+      "SPACE — ROUTE COOLANT TO JUNCTION (requires coolant node)",
+      "ESC — PAUSE",
+      "",
+      "OBJECTIVE:",
+      "Navigate to each junction marker.",
+      "Collect coolant nodes (—) from the floor.",
+      "Route coolant to shut down each subsystem.",
+      "Shut down all subsystems before meltdown.",
+      "",
+      "MACHINES: SORT-3X — WELD-7 — CONV-9 — PRESS-X — CORE-AI"
+    ];
+    
+    content.forEach((line, index) => {
+      this.howToPlayOverlay.add(this.add.text(width/2, height/2 - 100 + index * 18, line, {
+        fontFamily: "'Geist Mono', monospace",
+        fontSize: '11px',
+        color: MainMenu.S_GREY,
+        letterSpacing: 1,
+      }).setOrigin(0.5));
+    });
+    
+    // Close button
+    const closeBtn = this.add.text(width/2, height/2 + 160, '[ CLOSE ]', {
+      fontFamily: "'Azeret Mono', monospace",
+      fontSize: '12px',
+      color: MainMenu.S_GREY,
+      letterSpacing: 3,
+    }).setOrigin(0.5)
+     .setInteractive({ useHandCursor: true })
+     .on('pointerdown', () => this.hideHowToPlay())
+     .on('pointerover', () => closeBtn.setColor(MainMenu.S_TEAL))
+     .on('pointerout', () => closeBtn.setColor(MainMenu.S_GREY));
+    
+    this.howToPlayOverlay.add(closeBtn);
+  }
+
+  private toggleHowToPlay(): void {
+    if (this.howToPlayVisible) {
+      this.hideHowToPlay();
+    } else {
+      this.showHowToPlay();
+    }
+  }
+
+  private showHowToPlay(): void {
+    this.howToPlayOverlay.setVisible(true);
+    this.howToPlayVisible = true;
+    this.howToPlayBtn.setColor(MainMenu.S_TEAL);
+    this.howToPlayBtn.setText('[ CLOSE HELP ]');
+  }
+
+  private hideHowToPlay(): void {
+    this.howToPlayOverlay.setVisible(false);
+    this.howToPlayVisible = false;
+    this.howToPlayBtn.setColor(MainMenu.S_GREY);
+    this.howToPlayBtn.setText('[ HOW TO PLAY ]');
   }
 }

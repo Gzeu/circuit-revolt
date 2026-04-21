@@ -159,9 +159,28 @@ export class CircuitPath {
         this.dot = undefined;
         this.glowIntensity = 0;
         this.draw();
-        onComplete?.();
+        
+        // Self-loop for continuous pulsing
+        if (this.active) {
+          this.scene.time.delayedCall(100, () => {
+            if (this.active) {
+              this.pulse(durationMs, onComplete);
+            }
+          });
+        } else {
+          onComplete?.();
+        }
       },
     });
+  }
+
+  destroy(): void {
+    this.active = false;
+    this.tween?.stop();
+    this.dot?.destroy();
+    this.graphics?.destroy();
+    this.sparkles.forEach(sparkle => sparkle.destroy());
+    this.sparkles = [];
   }
 
   setColor(color: number): void {
