@@ -1,0 +1,50 @@
+[
+  {
+    "id": "SORT-3X",
+    "name": "SORT-3X™",
+    "floor": 1,
+    "description": "A belt-fed sorting automaton running rogue triage logic. Primary threat: mis-routing all packages to HAZMAT overflow.",
+    "subsystems": [
+      {
+        "id": "SORT-3X/INPUT-GATE",
+        "name": "INPUT GATE",
+        "rule": [
+          { "field": "belt.speed", "operator": ">", "value": 60 }
+        ],
+        "exitCondition": "Reduce belt.speed to ≤ 60 by redirecting power node ALPHA away from drive motor",
+        "exitCode": "belt.speed <= 60",
+        "pathPoints": [[120, 200], [200, 200], [200, 280], [280, 280]],
+        "color": "#00E5C8",
+        "sequenceIndex": 0,
+        "hazardOutput": "DangerPulse every 0.8s to downstream subsystems"
+      },
+      {
+        "id": "SORT-3X/TRIAGE-LOGIC",
+        "name": "TRIAGE LOGIC",
+        "rule": [
+          { "field": "sort.mode", "operator": "==", "value": "HAZMAT_OVERRIDE" },
+          { "field": "error.count", "operator": ">=", "value": 3 }
+        ],
+        "exitCondition": "Reroute circuit path BETA through the null-gate to flush error.count below 3",
+        "exitCode": "sort.mode == 'NOMINAL' && error.count < 3",
+        "pathPoints": [[280, 280], [360, 280], [360, 360], [440, 360]],
+        "color": "#00E5C8",
+        "sequenceIndex": 1,
+        "hazardOutput": "MisroUTE to HAZMAT every 1.2s"
+      },
+      {
+        "id": "SORT-3X/OUTPUT-LOCK",
+        "name": "OUTPUT LOCK",
+        "rule": [
+          { "field": "lock.engaged", "operator": "==", "value": true }
+        ],
+        "exitCondition": "Complete ALPHA + BETA paths to satisfy lock.engaged == false and trigger graceful shutdown",
+        "exitCode": "lock.engaged == false",
+        "pathPoints": [[440, 360], [560, 360], [560, 440], [680, 440]],
+        "color": "#00E5C8",
+        "sequenceIndex": 2,
+        "hazardOutput": "SYSTEM_HALT blocks all downstream machines"
+      }
+    ]
+  }
+]
